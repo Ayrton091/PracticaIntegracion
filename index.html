@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Cursos y Docentes</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <h1>API de Cursos y Docentes</h1>
+
+    <!-- DOCENTES -->
+    <div class="section">
+        <h2>Listar Docentes</h2>
+        <button onclick="listarDocentes()">Listar Docentes</button>
+        <ul id="lista-docentes"></ul>
+    </div>
+
+    <div class="section">
+        <h2>Agregar Docente</h2>
+        <form id="form-agregar-docente" onsubmit="agregarDocente(event)">
+            <label>Apellidos:</label><input type="text" id="docente-apellidos" required><br>
+            <label>Nombres:</label><input type="text" id="docente-nombres" required><br>
+            <label>Profesión:</label><input type="text" id="docente-profesion" required><br>
+            <label>Fecha Nacimiento:</label><input type="date" id="docente-fecha" required><br>
+            <label>Correo:</label><input type="email" id="docente-correo" required><br>
+            <button type="submit">Agregar Docente</button>
+        </form>
+        <div id="agregar-docente-resultado"></div>
+    </div>
+
+    <!-- CURSOS -->
+    <div class="section">
+        <h2>Listar Cursos</h2>
+        <button onclick="listarCursos()">Listar Cursos</button>
+        <ul id="lista-cursos"></ul>
+    </div>
+
+    <div class="section">
+        <h2>Buscar Curso por ID</h2>
+        <input type="number" id="buscar-id" placeholder="ID del curso">
+        <button onclick="buscarCursoPorId()">Buscar</button>
+        <pre id="curso-por-id"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Buscar Cursos por Ciclo</h2>
+        <input type="number" id="buscar-ciclo" placeholder="Ciclo">
+        <button onclick="buscarPorCiclo()">Buscar</button>
+        <ul id="cursos-por-ciclo"></ul>
+    </div>
+
+    <div class="section">
+        <h2>Agregar Curso</h2>
+        <form id="form-agregar-curso" onsubmit="agregarCurso(event)">
+            <label>Nombre:</label><input type="text" id="curso-nombre" required><br>
+            <label>Créditos:</label><input type="number" id="curso-creditos" required><br>
+            <label>Horas Semanal:</label><input type="number" id="curso-horasSemanal" required><br>
+            <label>Ciclo:</label><input type="number" id="curso-ciclo" required><br>
+            <label>ID Docente:</label><input type="number" id="curso-idDocente" required><br>
+            <button type="submit">Agregar Curso</button>
+        </form>
+        <div id="agregar-curso-resultado"></div>
+    </div>
+
+    <div class="section">
+        <h2>Actualizar Curso</h2>
+        <form id="form-actualizar-curso" onsubmit="actualizarCurso(event)">
+            <label>ID:</label><input type="number" id="upd-id" required><br>
+            <label>Nombre:</label><input type="text" id="upd-nombre" required><br>
+            <label>Créditos:</label><input type="number" id="upd-creditos" required><br>
+            <label>Horas Semanal:</label><input type="number" id="upd-horasSemanal" required><br>
+            <label>Ciclo:</label><input type="number" id="upd-ciclo" required><br>
+            <label>ID Docente:</label><input type="number" id="upd-idDocente" required><br>
+            <button type="submit">Actualizar Curso</button>
+        </form>
+        <div id="actualizar-curso-resultado"></div>
+    </div>
+
+    <div class="section">
+        <h2>Eliminar Curso</h2>
+        <input type="number" id="eliminar-id" placeholder="ID del curso">
+        <button onclick="eliminarCurso()">Eliminar</button>
+        <div id="eliminar-curso-resultado"></div>
+    </div>
+
+    <script>
+        // URLs base
+        const apiCursos = "https://localhost:7294/api/cursos";
+        const apiDocentes = "https://localhost:7294/api/docentes";
+
+        // DOCENTES
+        function listarDocentes() {
+            fetch(apiDocentes)
+                .then(r => r.json())
+                .then(data => {
+                    const ul = document.getElementById('lista-docentes');
+                    ul.innerHTML = '';
+                    data.forEach(docente => {
+                        const li = document.createElement('li');
+                        li.textContent = `ID: ${docente.id}, ${docente.nombres} ${docente.apellidos}, Profesión: ${docente.profesion}, Correo: ${docente.correo}`;
+                        ul.appendChild(li);
+                    });
+                });
+        }
+
+        function agregarDocente(event) {
+            event.preventDefault();
+            const docente = {
+                apellidos: document.getElementById('docente-apellidos').value,
+                nombres: document.getElementById('docente-nombres').value,
+                profesion: document.getElementById('docente-profesion').value,
+                fechaNacimiento: document.getElementById('docente-fecha').value,
+                correo: document.getElementById('docente-correo').value
+            };
+            fetch(apiDocentes, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(docente)
+            })
+            .then(r => r.ok ? r.json() : Promise.reject('Error al agregar docente'))
+            .then(data => {
+                document.getElementById('agregar-docente-resultado').textContent = 'Docente agregado con ID: ' + data.id;
+                listarDocentes();
+            })
+            .catch(() => {
+                document.getElementById('agregar-docente-resultado').textContent = 'Error al agregar docente';
+            });
+        }
+
+        // CURSOS
+        function listarCursos() {
+            fetch(apiCursos)
+                .then(r => r.json())
+                .then(data => {
+                    const ul = document.getElementById('lista-cursos');
+                    ul.innerHTML = '';
+                    data.forEach(curso => {
+                        const li = document.createElement('li');
+                        li.textContent = `ID: ${curso.id}, Nombre: ${curso.nombre}, Créditos: ${curso.creditos}, Ciclo: ${curso.ciclo}, Docente: ${curso.idDocente}`;
+                        ul.appendChild(li);
+                    });
+                });
+        }
+
+        function buscarCursoPorId() {
+            const id = document.getElementById('buscar-id').value;
+            if (!id) return;
+            fetch(`${apiCursos}/${id}`)
+                .then(r => r.ok ? r.json() : Promise.reject('No encontrado'))
+                .then(curso => {
+                    document.getElementById('curso-por-id').textContent = JSON.stringify(curso, null, 2);
+                })
+                .catch(() => {
+                    document.getElementById('curso-por-id').textContent = 'Curso no encontrado';
+                });
+        }
+
+        function buscarPorCiclo() {
+            const ciclo = document.getElementById('buscar-ciclo').value;
+            if (!ciclo) return;
+            fetch(`${apiCursos}/ciclo/${ciclo}`)
+                .then(r => r.json())
+                .then(data => {
+                    const ul = document.getElementById('cursos-por-ciclo');
+                    ul.innerHTML = '';
+                    data.forEach(curso => {
+                        const li = document.createElement('li');
+                        li.textContent = `ID: ${curso.id}, Nombre: ${curso.nombre}, Créditos: ${curso.creditos}, Docente: ${curso.idDocente}`;
+                        ul.appendChild(li);
+                    });
+                });
+        }
+
+        function agregarCurso(event) {
+            event.preventDefault();
+            const curso = {
+                nombre: document.getElementById('curso-nombre').value,
+                creditos: parseInt(document.getElementById('curso-creditos').value),
+                horasSemanal: parseInt(document.getElementById('curso-horasSemanal').value),
+                ciclo: parseInt(document.getElementById('curso-ciclo').value),
+                idDocente: parseInt(document.getElementById('curso-idDocente').value)
+            };
+            fetch(apiCursos, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(curso)
+            })
+            .then(r => r.ok ? r.json() : Promise.reject('Error al agregar curso'))
+            .then(data => {
+                document.getElementById('agregar-curso-resultado').textContent = 'Curso agregado con ID: ' + data.id;
+                listarCursos();
+            })
+            .catch(() => {
+                document.getElementById('agregar-curso-resultado').textContent = 'Error al agregar curso';
+            });
+        }
+
+        function actualizarCurso(event) {
+            event.preventDefault();
+            const id = document.getElementById('upd-id').value;
+            const curso = {
+                id: parseInt(id),
+                nombre: document.getElementById('upd-nombre').value,
+                creditos: parseInt(document.getElementById('upd-creditos').value),
+                horasSemanal: parseInt(document.getElementById('upd-horasSemanal').value),
+                ciclo: parseInt(document.getElementById('upd-ciclo').value),
+                idDocente: parseInt(document.getElementById('upd-idDocente').value)
+            };
+            fetch(`${apiCursos}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(curso)
+            })
+            .then(r => r.ok ? 'Curso actualizado' : Promise.reject('Error al actualizar curso'))
+            .then(msg => {
+                document.getElementById('actualizar-curso-resultado').textContent = msg;
+                listarCursos();
+            })
+            .catch(() => {
+                document.getElementById('actualizar-curso-resultado').textContent = 'Error al actualizar curso';
+            });
+        }
+
+        function eliminarCurso() {
+            const id = document.getElementById('eliminar-id').value;
+            if (!id) return;
+            fetch(`${apiCursos}/${id}`, { method: 'DELETE' })
+                .then(r => r.ok ? 'Curso eliminado' : Promise.reject('Error al eliminar curso'))
+                .then(msg => {
+                    document.getElementById('eliminar-curso-resultado').textContent = msg;
+                    listarCursos();
+                })
+                .catch(() => {
+                    document.getElementById('eliminar-curso-resultado').textContent = 'Error al eliminar curso';
+                });
+        }
+    </script>
+</body>
+</html>
