@@ -1,30 +1,22 @@
-version: '3.8'
+# Imagen base para aplicaciones ASP.NET Core
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
 
-services:
-  mongo:
-    image: mongo:7
-    container_name: mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_DATABASE: InstitutoDb
-    volumes:
-      - mongo_data:/data/db
+# Imagen para build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: api-instituto
-    ports:
-      - "8080:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - MongoDbSettings__ConnectionString=mongodb://mongo:27017
-      - MongoDbSettings__DatabaseName=InstitutoDb
-    depends_on:
-      - mongo
+# Copia el archivo de proyecto y restaura dependencias
+COPY Practica1/Practica1.csproj Practica1/
+RUN dotnet restore Practica1/Practica1.csproj
 
-volumes:
-  mongo_data:
+# Copia el resto del código y publica la app
+COPY . .
+RUN dotnet publish Practica1/Practica1.csproj -c Release -o /app/publish
+
+# Imagen final
+FROM base AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "Practica1.dll"]
