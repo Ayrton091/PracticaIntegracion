@@ -8,12 +8,12 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copia el archivo de proyecto y restaura dependencias
-COPY Practica1/Practica1.csproj Practica1/
-RUN dotnet restore Practica1/Practica1.csproj
+COPY Practica1.csproj ./
+RUN dotnet restore ./Practica1.csproj
 
 # Copia el resto del código y publica la app
 COPY . .
-RUN dotnet publish Practica1/Practica1.csproj -c Release -o /app/publish
+RUN dotnet publish ./Practica1.csproj -c Release -o /app/publish
 
 # Imagen final
 FROM base AS final
